@@ -1,0 +1,65 @@
+.steps {
+  padding: 100px 16px; /* plus de hauteur globale */
+  background: #f9fafb;
+}
+
+.steps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.steps-intro h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(32px, 4.5vw, 48px); /* plus grand */
+  font-weight: 900;
+  color: #059669; /* vert émeraude */
+  margin-bottom: 16px;
+}
+
+.steps-intro p {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(18px, 2vw, 20px);
+  color: #374151;
+  margin-bottom: 64px; /* plus d’espace après le texte */
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px; /* plus d’espace entre chaque bloc */
+}
+
+.step img {
+  height: 90px; /* un peu plus grand */
+  margin-bottom: 20px;
+  transition: transform .3s ease;
+}
+
+.step img:hover {
+  transform: scale(1.1);
+}
+
+.step h3 {
+  font-size: 26px;   /* agrandi */
+  font-weight: 800;
+  color: #111827;    /* noir */
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.step p {
+  font-size: 17px;
+  color: #374151;
+  line-height: 1.7;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+  .steps-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 64px; /* encore plus d’espace entre colonnes */
+  }
+}

@@ -1,0 +1,54 @@
+<section class="lead" id="form">
+    <div class="lead-container">
+        <!-- Image -->
+        <div class="lead-image">
+            <img src="/demande.jpg" alt="Entreprise recevant ses vélos cargo gratuits" />
+        </div>
+
+        <!-- Texte + Formulaire -->
+        <div class="lead-content">
+            <h2>
+                Recevez votre <span class="highlight">vélo cargo électrique gratuitement</span>, entièrement financé par
+                les CEE,
+                avec <span class="highlight">livraison offerte </span>en France métropolitaine et DOM-TOM
+            </h2>
+
+            <p>
+                Dans le cadre de la transition énergétique, équipez votre entreprise avec des
+                vélos cargo <strong>100% gratuits</strong>.
+            </p>
+
+            <form #f="ngForm" (ngSubmit)="submit(f)" class="form">
+                <input name="company" [(ngModel)]="model.company" required placeholder="Nom de l'entreprise *" />
+
+                <input name="phone" [(ngModel)]="model.phone" required placeholder="Numéro de téléphone *"
+                    pattern="^[0-9+() .-]{6,}$" />
+
+                <input type="number" name="bikes" [(ngModel)]="model.bikes" required min="1"
+                    placeholder="Nombre de vélos *" />
+
+                <input type="email" name="email" [(ngModel)]="model.email" required placeholder="Email *" />
+
+                <input name="firstName" [(ngModel)]="model.firstName" required placeholder="Prénom *" />
+
+                <input name="lastName" [(ngModel)]="model.lastName" required placeholder="Nom *" />
+
+                <input name="siret" [(ngModel)]="model.siret" required maxlength="14" placeholder="SIRET *"
+                    pattern="^[0-9]{14}$" />
+
+                <!-- Terms -->
+                <label class="terms">
+                    <input type="checkbox" name="terms" [(ngModel)]="model.terms" required />
+                    <span>J'ai lu et j'accepte les <!-- <a routerLink="/cgu"> -->Termes et
+                        Conditions<!-- </a> --></span>
+                </label>
+
+                <button class="cta">Recevoir mes vélos</button>
+                <p class="sent" *ngIf="f.invalid && f.submitted">
+                    Merci de compléter les champs manquants pour finaliser votre demande.
+                </p>
+                <p class="sent" *ngIf="sent">Merci ! Votre demande a bien été envoyée.</p>
+            </form>
+        </div>
+    </div>
+</section>

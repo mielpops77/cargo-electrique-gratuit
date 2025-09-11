@@ -1,0 +1,111 @@
+.hero {
+  padding: 60px 16px;
+  background: #f9fafb; /* léger fond gris clair */
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.hero-text {
+  flex: 1;
+  text-align: center;
+}
+
+.hero-text h1 {
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(32px, 5vw, 56px); /* + grand et responsive */
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #111827;
+  line-height: 1.2;
+}
+
+/* Met en avant la partie clé */
+.hero-text .highlight {
+  color: #059669; /* vert émeraude */
+  font-weight: 900;
+}
+.hero-text p {
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(18px, 2vw, 20px); /* un peu plus grand */
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.75; /* plus aéré */
+  margin-bottom: 32px;
+  max-width: 600px; /* pour éviter les lignes trop longues */
+}
+
+/* Option : ajouter un léger effet de contraste pour lisibilité */
+.hero-text p strong {
+  color: #059669;
+  font-weight: 600;
+}
+
+
+.hero-text .cta {
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(16px, 1.8vw, 10px); /* un peu plus grand */
+  font-weight: 600;
+  letter-spacing: 0.3px; /* léger espacement */
+  text-transform: uppercase; /* option : tout en majuscules pour impact */
+  
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  padding: 14px 26px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.hero-text .cta:hover,
+.hero-text .cta:active {
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
+  transform: translateY(-2px); /* petit effet de relief */
+}
+
+.hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: transparent;        /* évite tout fond blanc */
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform .35s ease, filter .35s ease;
+  /* ombre qui suit l'alpha du PNG (pas de rectangle) */
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,.12));
+}
+
+/* Hover: zoom + ombre un peu plus marquée */
+.hero-image:hover img {
+  transform: scale(1.06);
+  filter: drop-shadow(0 12px 30px rgba(0,0,0,.18));
+}
+
+@media (min-width: 900px) {
+  .hero-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hero-text { flex: 1; text-align: left; }
+  .hero-image { flex: 1.5; }
+  .hero-image img { max-width: 110%; transform: scale(1.15); }
+  .hero-image:hover img { transform: scale(1.22); }
+}

@@ -1,0 +1,56 @@
+.site-footer {
+  background: #111827; /* fond sombre moderne */
+  color: #f9fafb;
+  padding: 40px 16px 20px;
+  margin-top: 80px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-container .brand .logo {
+  height: 60px;
+  filter: brightness(0) invert(1); /* rend l’image blanche */
+}
+
+
+.footer-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-link {
+  color: #f9fafb;
+  text-decoration: none;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: color 0.25s ease;
+}
+
+.footer-link:hover {
+  color: #10b981; /* vert émeraude au hover */
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 14px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .footer-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

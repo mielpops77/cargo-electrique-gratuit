@@ -1,0 +1,146 @@
+.lead {
+  padding: 60px 16px;
+  background: #fff;
+}
+
+.lead-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 32px;
+}
+
+/* Image */
+.lead-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.lead-image img {
+  max-width: 100%;
+  height: auto;
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform .35s ease, filter .35s ease;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,.08));
+}
+.lead-image:hover img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.14));
+}
+
+/* Contenu + formulaire */
+.lead-content h2 {
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(24px, 3.6vw, 34px);
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.25;
+  margin-bottom: 12px;
+
+
+
+}
+
+  .lead-content .highlight {
+  color: #059669;     /* vert émeraude cohérent */
+  font-weight: 900;   /* un peu plus gras */
+}
+.lead-content p {
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(16px, 2vw, 18px);
+  color: #374151;
+  margin-bottom: 18px;
+}
+
+/* Formulaire */
+.form {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.form label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="number"],
+.form input:not([type]) {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 12px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.form input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5,150,105,.15);
+}
+
+.terms {
+  display: flex;
+  align-items: center;  /* aligne la checkbox et le texte */
+  gap: 10px;
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.terms input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #059669; /* couleur verte native (Chrome, Edge, etc.) */
+  flex-shrink: 0;        /* évite que la case se compresse */
+  margin: 0;             /* enlève le léger décalage */
+}
+
+.terms a { text-decoration: underline; }
+
+/* Bouton CTA (cohérent avec le header/hero) */
+.cta {
+  display: inline-block;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all .25s ease;
+  cursor: pointer;
+}
+.cta:hover,
+.cta:active,
+.cta:focus-visible {
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
+  transform: translateY(-1px);
+}
+.cta:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Message d’envoi */
+.sent {
+  color: #059669;
+  margin-top: 6px;
+}
+
+/* Desktop : image à gauche, contenu à droite */
+@media (min-width: 900px) {
+  .lead-container {
+     grid-template-columns: 0.9fr 1fr; /* moins de place à l’image */
+    align-items: center;
+        gap: 40px; /* espace entre image et texte */
+
+  }
+  .lead-image img {
+    max-width: 85%;   /* plus petite qu’avant */
+    transform: none;  /* enlève le zoom forcé */
+  }
+}

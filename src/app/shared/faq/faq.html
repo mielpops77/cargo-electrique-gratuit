@@ -1,0 +1,90 @@
+<section class="faq" id="form">
+    <div class="faq-container">
+        <h2 class="title">FAQ</h2>
+
+        <div class="accordion">
+
+            <!-- 1 -->
+            <div class="item">
+                <button class="q" (click)="toggle(0)" [attr.aria-expanded]="openIndex===0">
+                    <span>Qu'est-ce que la fiche TRA-EQ-131</span>
+                    <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="a" *ngIf="openIndex===0">
+                    <p>
+                        La fiche <strong>TRA-EQ-131</strong> est une opération standardisée d'économies d'énergie
+                        introduite dans le cadre des Certificats d'Économies d'Énergie (CEE).
+                        Elle concerne l'achat ou la location, par une personne morale, de vélos-cargos
+                        neufs ou reconditionnés. Cette fiche est entrée en vigueur le <strong>1ᵉʳ janvier 2025</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="item">
+                <button class="q" (click)="toggle(1)" [attr.aria-expanded]="openIndex===1">
+                    <span>Qui est éligible à cette opération ?</span>
+                    <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="a" *ngIf="openIndex===1">
+                    <p>
+                        Les <strong>personnes morales</strong> — entreprises, associations, collectivités — ainsi que
+                        les
+                        <strong>auto-entrepreneurs</strong> peuvent bénéficier de cette opération en acquérant ou en
+                        louant des
+                        vélos-cargos neufs ou reconditionnés.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="item">
+                <button class="q" (click)="toggle(2)" [attr.aria-expanded]="openIndex===2">
+                    <span>Quelles sont les conditions pour bénéficier des CEE avec cette fiche ?</span>
+                    <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="a" *ngIf="openIndex===2">
+                    <p>Pour être éligible, l'opération doit respecter les conditions suivantes :</p>
+                    <ul>
+                        <li>Les vélos-cargos doivent être <strong>neufs ou reconditionnés</strong>.</li>
+                        <li>En cas de location, la durée du contrat doit être d'<strong>au moins 24 mois</strong> (hors
+                            reconduction tacite).</li>
+                        <li>Pour les vélos-cargos reconditionnés, ils doivent être <strong>enregistrés</strong> sur le
+                            fichier national unique des cycles identifiés.</li>
+                        <li>Les véhicules commandés <strong>avant le 2 décembre 2024</strong> et dont la facturation ou
+                            le
+                            paiement du premier loyer est antérieur au <strong>14 février 2025</strong> ne sont pas
+                            éligibles.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4 : Livraison -->
+            <div class="item">
+                <button class="q" (click)="toggle(3)" [attr.aria-expanded]="openIndex===3">
+                    <span>La livraison est-elle gratuite ?</span>
+                    <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="a" *ngIf="openIndex===3">
+                    <p>
+                        Oui. La <strong>livraison est offerte</strong> en <strong>France métropolitaine</strong> et dans
+                        les
+                        <strong>DOM-TOM</strong> selon disponibilité logistique.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+         <div class="faq-cta">
+      <a href="#form" class="cta">Demandez vos vélos cargo maintenant</a>
+    </div>
+    </div>
+</section>
