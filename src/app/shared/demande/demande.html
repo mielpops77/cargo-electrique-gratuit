@@ -1,4 +1,4 @@
-<section class="lead" id="form">
+<section class="lead" >
     <div class="lead-container">
         <!-- Image -->
         <div class="lead-image">
@@ -6,7 +6,7 @@
         </div>
 
         <!-- Texte + Formulaire -->
-        <div class="lead-content">
+        <div class="lead-content" id="form">
             <h2>
                 Recevez votre <span class="highlight">vélo cargo électrique gratuitement</span>, entièrement financé par
                 les CEE,
@@ -18,7 +18,7 @@
                 vélos cargo <strong>100% gratuits</strong>.
             </p>
 
-            <form #f="ngForm" (ngSubmit)="submit(f)" class="form">
+            <form #f="ngForm" (ngSubmit)="submit(f)" class="form" >
                 <input name="company" [(ngModel)]="model.company" required placeholder="Nom de l'entreprise *" />
 
                 <input name="phone" [(ngModel)]="model.phone" required placeholder="Numéro de téléphone *"
