@@ -1,72 +1,79 @@
-/* Conteneur : espace respirant + alignements */
+/* Container : on garde flex et espace équilibré */
 .container {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 70px;
-    /* base */
-    flex-wrap: wrap;
-    /* permet de passer le bouton à la ligne si l’écran est très étroit */
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 70px;
+  flex-wrap: wrap;
+  position: relative; /* pour centrer logo2 */
 }
 
-/* Logo : taille responsive bien équilibrée */
+/* Logo gauche */
 .logo {
-    /* mobile: ~60px | desktop: ~84px, avec limite haute */
-    height: clamp(56px, 7vw, 84px);
-    width: auto;
-    display: block;
-    transition: transform .15s ease;
+  height: clamp(56px, 7vw, 84px);
+  width: auto;
+  display: block;
+  transition: transform .15s ease;
+}
+.brand:hover .logo {
+  transform: scale(1.04);
 }
 
+/* Logo centre */
+.brand-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.logo2 {
+  height: clamp(40px, 6vw, 70px);
+  width: auto;
+  display: block;
+}
+
+/* CTA bouton */
 .cta {
-    display: inline-block;
-    background: #fff;
-    /* fond blanc par défaut */
-    color: #000;
-    /* texte noir */
-    border: 2px solid #000;
-    /* contour noir bien visible */
-    text-decoration: none;
-    padding: clamp(10px, 1.4vw, 12px) clamp(14px, 2vw, 18px);
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: clamp(14px, 1.6vw, 16px);
-    white-space: nowrap;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
+  display: inline-block;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  text-decoration: none;
+  padding: clamp(10px, 1.4vw, 12px) clamp(14px, 2vw, 18px);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 16px);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-
-/* survol ou clic → vert */
 .cta:hover,
 .cta:active {
-    background: #059669;
-    /* vert */
-    color: #fff;
-    /* texte blanc */
-    border-color: #059669;
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
 }
 
-
-/* Desktop : un peu plus d’ampleur verticale pour respirer */
+/* Desktop : plus d’espace */
 @media (min-width: 900px) {
-    .container {
-        min-height: 86px;
-    }
-}
-
-/* Petit effet au survol, sans exagérer */
-.brand:hover .logo {
-    transform: scale(1.04);
+  .container {
+    min-height: 86px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .logo {
-        transition: none;
-    }
+  .logo, .logo2 {
+    transition: none;
+  }
 }
+
+
+/* Cacher le logo2 au milieu sur mobile */
+@media (max-width: 640px) {
+  .brand-center { display: none; }
+}
+

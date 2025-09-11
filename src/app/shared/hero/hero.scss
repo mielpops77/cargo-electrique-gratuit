@@ -109,3 +109,22 @@
   .hero-image img { max-width: 110%; transform: scale(1.15); }
   .hero-image:hover img { transform: scale(1.22); }
 }
+
+
+
+/* caché par défaut (desktop) */
+.mobile-only { display: none; }
+
+@media (max-width: 640px) {
+  .mobile-only {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0 12px;     /* petit espace au-dessus de ton titre */
+  }
+  .mobile-only img {
+    height: 44px;           /* ajuste si besoin (36–56px) */
+    width: auto;
+    display: block;
+  }
+}
