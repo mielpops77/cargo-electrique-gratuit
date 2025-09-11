@@ -120,11 +120,39 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 8px 0 12px;     /* petit espace au-dessus de ton titre */
+    margin: 0;          /* aucun espace en haut ni en bas */
+    padding: 0;         /* supprime tout éventuel padding */
   }
   .mobile-only img {
-    height: 44px;           /* ajuste si besoin (36–56px) */
+    height: 88px;       /* taille du logo (tu peux monter à 52px si trop petit) */
     width: auto;
     display: block;
+    line-height: 0;
+    margin: 0;          /* supprime aussi l’espace interne */
+    padding: 0;
+  }
+    .hero-text h1 {
+    margin-top: 10px;   /* rapproche le titre du logo */
   }
 }
+
+
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 20px;   /* réduit l’espace du haut */
+    padding-bottom: 30px; /* réduit en bas */
+  }
+
+  .mobile-only {
+    margin: 0;
+    padding: 0;
+  }
+
+
+
+  .hero-text h1 {
+    margin-top: 10px;   /* rapproche le titre du logo */
+  }
+}
+
+
