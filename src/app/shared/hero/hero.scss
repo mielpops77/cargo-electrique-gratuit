@@ -31,6 +31,7 @@
   color: #059669; /* vert émeraude */
   font-weight: 900;
 }
+
 .hero-text p {
   font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: clamp(18px, 2vw, 20px); /* un peu plus grand */
@@ -47,14 +48,12 @@
   font-weight: 600;
 }
 
-
 .hero-text .cta {
   font-family: 'Poppins', 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: clamp(16px, 1.8vw, 10px); /* un peu plus grand */
   font-weight: 600;
   letter-spacing: 0.3px; /* léger espacement */
   text-transform: uppercase; /* option : tout en majuscules pour impact */
-  
   background: #fff;
   color: #000;
   border: 2px solid #000;
@@ -98,6 +97,7 @@
   filter: drop-shadow(0 12px 30px rgba(0,0,0,.18));
 }
 
+/* Desktop */
 @media (min-width: 900px) {
   .hero-container {
     flex-direction: row;
@@ -110,49 +110,34 @@
   .hero-image:hover img { transform: scale(1.22); }
 }
 
-
-
 /* caché par défaut (desktop) */
 .mobile-only { display: none; }
 
+/* Mobile (fusion des règles) */
 @media (max-width: 640px) {
+  .hero {
+    padding-top: 20px;     /* réduit l’espace du haut */
+    padding-bottom: 30px;  /* réduit en bas */
+  }
+
   .mobile-only {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0;          /* aucun espace en haut ni en bas */
-    padding: 0;         /* supprime tout éventuel padding */
+    margin: 0;             /* aucun espace en haut ni en bas */
+    padding: 0;
   }
+
   .mobile-only img {
-    height: 88px;       /* taille du logo (tu peux monter à 52px si trop petit) */
+    height: 77px;          /* taille du logo */
     width: auto;
     display: block;
     line-height: 0;
-    margin: 0;          /* supprime aussi l’espace interne */
-    padding: 0;
-  }
-    .hero-text h1 {
-    margin-top: 10px;   /* rapproche le titre du logo */
-  }
-}
-
-
-@media (max-width: 640px) {
-  .hero {
-    padding-top: 20px;   /* réduit l’espace du haut */
-    padding-bottom: 30px; /* réduit en bas */
-  }
-
-  .mobile-only {
     margin: 0;
     padding: 0;
   }
 
-
-
   .hero-text h1 {
-    margin-top: 10px;   /* rapproche le titre du logo */
+    margin-top: 10px;      /* rapproche le titre du logo */
   }
 }
-
-
