@@ -4,20 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
-
-
-
 type LeadForm = {
-  company: string;
-  phone: string;
-  bikes: number | null;
-  email: string;
   firstName: string;
   lastName: string;
+
+  phone: string;
+  email: string;
+
+  company: string;
   siret: string;
+
+  deliveryAddress: string;
+  postcode: string;
+  city: string;
+
+  employees: number | null;
   terms: boolean;
 };
-
 
 @Component({
   selector: 'ceg-demande',
@@ -31,46 +34,73 @@ export class Demande {
   errorMsg = '';
 
   model: LeadForm = {
-    company: '',
-    phone: '',
-    bikes: null,
-    email: '',
     firstName: '',
     lastName: '',
+
+    phone: '',
+    email: '',
+
+    company: '',
     siret: '',
+
+    deliveryAddress: '',
+    postcode: '',
+    city: '',
+
+    employees: null,
     terms: false,
   };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   async submit(form: any) {
-    // bouton toujours cliquable, même si incomplet
     this.sending = true;
     this.errorMsg = '';
 
+    const employees = Number(this.model.employees ?? 0);
+    const bikes = employees; // 1 employé = 1 vélo
+
     const payload = {
-      access_key: '4def483f-ea91-4f67-85bf-55a98045b890',  // <-- remplace !
+      access_key: '4def483f-ea91-4f67-85bf-55a98045b890', // <-- remplace par ta clé
       subject: 'Nouvelle demande vélo cargo',
-      from_name: this.model.firstName + ' ' + this.model.lastName,
-      // Contenu du message (tu peux ajuster le format)
+      from_name: `${this.model.firstName} ${this.model.lastName}`,
+
+      // Message texte (lisible dans l’email reçu)
       message: `
-Entreprise : ${this.model.company}
-Téléphone : ${this.model.phone}
-Email : ${this.model.email}
 Prénom : ${this.model.firstName}
 Nom : ${this.model.lastName}
+
+Téléphone : ${this.model.phone}
+Email : ${this.model.email}
+
+Entreprise : ${this.model.company}
 SIRET : ${this.model.siret}
-Nb vélos : ${this.model.bikes ?? ''}
+
+Adresse de livraison : ${this.model.deliveryAddress}
+${this.model.postcode} ${this.model.city}
+
+Employés éligibles : ${employees}
+Vélos demandés (calcul) : ${bikes}
+
 CGU acceptées : ${this.model.terms ? 'oui' : 'non'}
       `.trim(),
-      // Champs additionnels en clair si tu veux les retrouver séparément
-      company: this.model.company,
-      phone: this.model.phone,
-      email: this.model.email,
+
+      // Champs structurés (facile à parser côté réception)
       firstName: this.model.firstName,
       lastName: this.model.lastName,
+
+      phone: this.model.phone,
+      email: this.model.email,
+
+      company: this.model.company,
       siret: this.model.siret,
-      bikes: String(this.model.bikes ?? ''),
+
+      deliveryAddress: this.model.deliveryAddress,
+      postcode: this.model.postcode,
+      city: this.model.city,
+
+      employees: String(employees),
+      bikes: String(bikes),
       terms: this.model.terms ? 'yes' : 'no',
     };
 
@@ -81,7 +111,7 @@ CGU acceptées : ${this.model.terms ? 'oui' : 'non'}
 
       if (res?.success) {
         this.sent = true;
-        // option: form.resetForm();
+        // form.resetForm(); // <- tu peux activer ça si tu veux vider le formulaire après envoi
       } else {
         this.errorMsg = "Une erreur est survenue lors de l'envoi.";
       }

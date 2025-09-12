@@ -1,54 +1,63 @@
-<section class="lead" >
-    <div class="lead-container">
-        <!-- Image -->
-        <div class="lead-image">
-            <img src="/demande.jpg" alt="Entreprise recevant ses vélos cargo gratuits" />
-        </div>
-
-        <!-- Texte + Formulaire -->
-        <div class="lead-content" id="form">
-            <h2>
-                Recevez votre <span class="highlight">vélo cargo électrique gratuitement</span>, entièrement financé par
-                les CEE,
-                avec <span class="highlight">livraison offerte </span>en France métropolitaine et DOM-TOM
-            </h2>
-
-            <p>
-                Dans le cadre de la transition énergétique, équipez votre entreprise avec des
-                vélos cargo <strong>100% gratuits</strong>.
-            </p>
-
-            <form #f="ngForm" (ngSubmit)="submit(f)" class="form" >
-                <input name="company" [(ngModel)]="model.company" required placeholder="Nom de l'entreprise *" />
-
-                <input name="phone" [(ngModel)]="model.phone" required placeholder="Numéro de téléphone *"
-                    pattern="^[0-9+() .-]{6,}$" />
-
-                <input type="number" name="bikes" [(ngModel)]="model.bikes" required min="1"
-                    placeholder="Nombre de vélos *" />
-
-                <input type="email" name="email" [(ngModel)]="model.email" required placeholder="Email *" />
-
-                <input name="firstName" [(ngModel)]="model.firstName" required placeholder="Prénom *" />
-
-                <input name="lastName" [(ngModel)]="model.lastName" required placeholder="Nom *" />
-
-                <input name="siret" [(ngModel)]="model.siret" required maxlength="14" placeholder="SIRET *"
-                    pattern="^[0-9]{14}$" />
-
-                <!-- Terms -->
-                <label class="terms">
-                    <input type="checkbox" name="terms" [(ngModel)]="model.terms" required />
-                    <span>J'ai lu et j'accepte les <!-- <a routerLink="/cgu"> -->Termes et
-                        Conditions<!-- </a> --></span>
-                </label>
-
-                <button class="cta">Recevoir mes vélos</button>
-                <p class="sent" *ngIf="f.invalid && f.submitted">
-                    Merci de compléter les champs manquants pour finaliser votre demande.
-                </p>
-                <p class="sent" *ngIf="sent">Merci ! Votre demande a bien été envoyée.</p>
-            </form>
-        </div>
+<section class="lead">
+  <div class="lead-container">
+    <!-- Image -->
+    <div class="lead-image">
+      <img src="/demande.jpg" alt="Entreprise recevant ses vélos cargo gratuits" />
     </div>
+
+    <!-- Texte + Formulaire -->
+    <div class="lead-content" id="form">
+      <h2>
+        Recevez votre <span class="highlight">vélo cargo électrique gratuitement</span>, entièrement financé par
+        les CEE, avec <span class="highlight">livraison offerte</span> en France métropolitaine et DOM-TOM
+      </h2>
+
+      <form #f="ngForm" (ngSubmit)="submit(f)" class="form" novalidate>
+
+        <!-- Identité -->
+        <div class="grid">
+          <input name="firstName" [(ngModel)]="model.firstName" required placeholder="Prénom *" autocomplete="given-name" />
+          <input name="lastName" [(ngModel)]="model.lastName" required placeholder="Nom *" autocomplete="family-name" />
+        </div>
+
+        <!-- Coordonnées -->
+        <input name="phone" [(ngModel)]="model.phone" required placeholder="Téléphone *"
+               autocomplete="tel" pattern="^[0-9+() .-]{6,}$" />
+        <input type="email" name="email" [(ngModel)]="model.email" required placeholder="Email *" autocomplete="email" />
+
+        <!-- Entreprise -->
+        <input name="company" [(ngModel)]="model.company" required placeholder="Nom de l'entreprise *" autocomplete="organization" />
+        <input name="siret" [(ngModel)]="model.siret" required maxlength="14"
+               placeholder="SIRET (14 chiffres) *" pattern="^[0-9]{14}$" />
+
+        <!-- Adresse de livraison -->
+        <input name="deliveryAddress" [(ngModel)]="model.deliveryAddress" required placeholder="Adresse de livraison *" autocomplete="address-line1" />
+        <div class="grid">
+          <input name="postcode" [(ngModel)]="model.postcode" required placeholder="Code postal *"
+                 autocomplete="postal-code" pattern="^[0-9]{5}$" />
+          <input name="city" [(ngModel)]="model.city" required placeholder="Ville *" autocomplete="address-level2" />
+        </div>
+
+        <!-- Nombre d'employés (donc vélos) -->
+        <input type="number" name="employees" [(ngModel)]="model.employees" required min="1"
+               placeholder="Nombre d'employés éligibles * (1 employé = 1 vélo)" />
+
+        <!-- Conditions -->
+        <label class="terms">
+          <input type="checkbox" name="terms" [(ngModel)]="model.terms" required />
+          <span>J'ai lu et j'accepte les Termes et Conditions</span>
+        </label>
+
+        <button class="cta" >
+          {{ sending ? 'Envoi en cours…' : 'Envoyer ma demande' }}
+        </button>
+
+        <p class="sent" *ngIf="f.invalid && f.submitted">
+          Merci de compléter les champs manquants pour finaliser votre demande.
+        </p>
+        <p class="sent" *ngIf="sent">Merci ! Votre demande a bien été envoyée.</p>
+        <p class="error" *ngIf="errorMsg">{{ errorMsg }}</p>
+      </form>
+    </div>
+  </div>
 </section>
