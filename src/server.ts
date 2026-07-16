@@ -3,6 +3,7 @@ import path from 'path';
 import { config } from './config';
 import { postsRouter } from './routes/posts';
 import { mediaRouter } from './routes/media';
+import { hashtagPresetsRouter } from './routes/hashtagPresets';
 import { startScheduler } from './scheduler';
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.use('/api/posts', postsRouter);
 app.use('/api/media', mediaRouter);
+app.use('/api/hashtag-presets', hashtagPresetsRouter);
 
 startScheduler();
 

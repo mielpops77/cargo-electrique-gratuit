@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { CreatePostInput, Platform, PlatformContentMap, PlatformResult, Post, PostStatus } from './types';
+import { CreatePostInput, HashtagPreset, Platform, PlatformContentMap, PlatformResult, Post, PostStatus } from './types';
 
 const dataDir = path.join(process.cwd(), 'data');
 fs.mkdirSync(dataDir, { recursive: true });
@@ -20,6 +20,15 @@ db.exec(`
     scheduledAt TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'scheduled',
     results TEXT NOT NULL DEFAULT '[]',
+    createdAt TEXT NOT NULL
+  )
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS hashtag_presets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    platform TEXT NOT NULL,
+    hashtags TEXT NOT NULL,
     createdAt TEXT NOT NULL
   )
 `);
@@ -116,4 +125,19 @@ export function updatePost(id: number, input: CreatePostInput): Post {
     scheduledAt: input.scheduledAt,
   });
   return getPost(id)!;
+}
+
+export function listHashtagPresets(): HashtagPreset[] {
+  return db.prepare('SELECT * FROM hashtag_presets ORDER BY createdAt ASC').all() as HashtagPreset[];
+}
+
+export function createHashtagPreset(platform: Platform, hashtags: string): HashtagPreset {
+  const info = db
+    .prepare('INSERT INTO hashtag_presets (platform, hashtags, createdAt) VALUES (?, ?, ?)')
+    .run(platform, hashtags, new Date().toISOString());
+  return db.prepare('SELECT * FROM hashtag_presets WHERE id = ?').get(info.lastInsertRowid) as HashtagPreset;
+}
+
+export function deleteHashtagPreset(id: number): void {
+  db.prepare('DELETE FROM hashtag_presets WHERE id = ?').run(id);
 }

@@ -6,6 +6,7 @@ const PLATFORM_EMOJI = {
 };
 
 const EDITABLE_STATUSES = ['scheduled', 'failed'];
+const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 const form = document.getElementById('post-form');
 const formTitle = document.getElementById('form-title');
@@ -14,6 +15,7 @@ const submitButton = document.getElementById('submit-button');
 const cancelEditButton = document.getElementById('cancel-edit');
 const postList = document.getElementById('post-list');
 const emptyMessage = document.getElementById('empty-message');
+const alertBanner = document.getElementById('alert-banner');
 
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file');
@@ -27,8 +29,17 @@ const platformToggle = document.getElementById('platform-toggle');
 const platformPanels = document.getElementById('platform-panels');
 const igStoryNote = document.getElementById('ig-story-note');
 
+const calendarView = document.getElementById('calendar-view');
+const calendarGrid = document.getElementById('calendar-grid');
+const calendarMonthLabel = document.getElementById('calendar-month-label');
+
 // State: when editing an existing post, holds { id, mediaPath, mediaType } until a new file replaces it.
 let editingPost = null;
+let cachedPosts = [];
+let hashtagPresets = [];
+let currentView = 'list';
+let calendarMonth = new Date();
+calendarMonth.setDate(1);
 
 // --- Dropzone / media preview ---
 
@@ -44,12 +55,12 @@ dropzone.addEventListener('drop', (event) => {
   dropzone.classList.remove('dragover');
   if (event.dataTransfer.files.length > 0) {
     fileInput.files = event.dataTransfer.files;
-    showPreview(fileInput.files[0]);
+    showPreview(URL.createObjectURL(fileInput.files[0]), fileInput.files[0].type.startsWith('video'));
   }
 });
 
 fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) showPreview(fileInput.files[0]);
+  if (fileInput.files[0]) showPreview(URL.createObjectURL(fileInput.files[0]), fileInput.files[0].type.startsWith('video'));
 });
 
 removeMediaButton.addEventListener('click', (event) => {
@@ -98,6 +109,76 @@ document.getElementById('ig-post-type-toggle').addEventListener('change', (event
   });
 });
 
+// --- Hashtag presets ---
+
+async function loadHashtagPresets() {
+  const response = await fetch('/api/hashtag-presets');
+  hashtagPresets = await response.json();
+  renderHashtagPresetChips();
+}
+
+function renderHashtagPresetChips() {
+  document.querySelectorAll('.hashtag-presets').forEach((container) => {
+    const platform = container.dataset.presetsPlatform;
+    const presets = hashtagPresets.filter((preset) => preset.platform === platform);
+    container.innerHTML = presets
+      .map(
+        (preset) => `
+          <span class="hashtag-chip" data-apply-preset-id="${preset.id}">
+            ${escapeHtml(preset.hashtags)}
+            <button type="button" data-delete-preset="${preset.id}" title="Supprimer ce preset">✕</button>
+          </span>
+        `,
+      )
+      .join('');
+  });
+}
+
+platformPanels.addEventListener('click', async (event) => {
+  const deleteButton = event.target.closest('[data-delete-preset]');
+  if (deleteButton) {
+    await fetch(`/api/hashtag-presets/${deleteButton.dataset.deletePreset}`, { method: 'DELETE' });
+    await loadHashtagPresets();
+    return;
+  }
+
+  const chip = event.target.closest('[data-apply-preset-id]');
+  if (chip) {
+    const preset = hashtagPresets.find((p) => p.id === Number(chip.dataset.applyPresetId));
+    if (preset) {
+      chip.closest('.platform-panel').querySelector('[data-field="hashtags"]').value = preset.hashtags;
+    }
+    return;
+  }
+
+  const saveButton = event.target.closest('[data-save-preset]');
+  if (saveButton) {
+    const platform = saveButton.dataset.savePreset;
+    const hashtagsInput = saveButton.closest('.platform-panel').querySelector('[data-field="hashtags"]');
+    const hashtags = hashtagsInput.value.trim();
+    if (!hashtags) return;
+    await fetch('/api/hashtag-presets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform, hashtags }),
+    });
+    await loadHashtagPresets();
+  }
+});
+
+// --- Alert banner (failed posts) ---
+
+function renderAlertBanner() {
+  const failedPosts = cachedPosts.filter((post) => post.status === 'failed');
+  if (failedPosts.length === 0) {
+    alertBanner.hidden = true;
+    return;
+  }
+  const label = failedPosts.length === 1 ? 'post a échoué' : 'posts ont échoué';
+  alertBanner.textContent = `⚠️ ${failedPosts.length} ${label} — vérifie les détails ci-dessous.`;
+  alertBanner.hidden = false;
+}
+
 // --- Post list ---
 
 function formatDate(iso) {
@@ -118,6 +199,13 @@ function renderPost(post) {
     : `<video class="post-thumb" src="/media/${post.mediaPath}" muted></video>`;
   const canEdit = EDITABLE_STATUSES.includes(post.status);
 
+  const errorItems = post.status === 'failed'
+    ? post.results
+        .filter((result) => !result.success)
+        .map((result) => `<li>${PLATFORM_EMOJI[result.platform] ?? result.platform} ${escapeHtml(result.error ?? 'Erreur inconnue')}</li>`)
+        .join('')
+    : '';
+
   return `
     <li class="post-card">
       ${thumb}
@@ -128,6 +216,7 @@ function renderPost(post) {
           <span class="post-platforms">${platformBadges}</span>
         </div>
         <p class="post-caption">${escapeHtml(post.baseText).slice(0, 140)}</p>
+        ${errorItems ? `<ul class="post-errors">${errorItems}</ul>` : ''}
         <div class="post-actions">
           ${canEdit ? `<button class="ghost-button" data-edit="${post.id}">Modifier</button>` : ''}
           <button class="delete-button" data-delete="${post.id}">Supprimer</button>
@@ -143,13 +232,13 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-let cachedPosts = [];
-
 async function loadPosts() {
   const response = await fetch('/api/posts');
   cachedPosts = await response.json();
 
-  emptyMessage.hidden = cachedPosts.length > 0;
+  renderAlertBanner();
+
+  emptyMessage.hidden = cachedPosts.length > 0 || currentView !== 'list';
   postList.innerHTML = cachedPosts.map(renderPost).join('');
 
   postList.querySelectorAll('[data-delete]').forEach((button) => {
@@ -166,7 +255,89 @@ async function loadPosts() {
       if (post) startEditing(post);
     });
   });
+
+  if (currentView === 'calendar') renderCalendar();
 }
+
+// --- Calendar view ---
+
+document.querySelectorAll('.view-toggle-button').forEach((button) => {
+  button.addEventListener('click', () => {
+    currentView = button.dataset.view;
+    document.querySelectorAll('.view-toggle-button').forEach((b) => b.classList.toggle('active', b === button));
+    postList.hidden = currentView !== 'list';
+    emptyMessage.hidden = currentView !== 'list' || cachedPosts.length > 0;
+    calendarView.hidden = currentView !== 'calendar';
+    if (currentView === 'calendar') renderCalendar();
+  });
+});
+
+document.getElementById('calendar-prev').addEventListener('click', () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById('calendar-next').addEventListener('click', () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+  renderCalendar();
+});
+
+function renderCalendar() {
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  calendarMonthLabel.textContent = calendarMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(year, month, 1);
+  const startOffset = (firstDay.getDay() + 6) % 7; // grille commençant le lundi
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+  const todayKey = new Date().toDateString();
+
+  let html = DAY_LABELS.map((label) => `<div class="calendar-day-header">${label}</div>`).join('');
+
+  for (let i = 0; i < totalCells; i++) {
+    const dayNumber = i - startOffset + 1;
+    let cellDate;
+    let outside = false;
+
+    if (dayNumber < 1) {
+      cellDate = new Date(year, month - 1, daysInPrevMonth + dayNumber);
+      outside = true;
+    } else if (dayNumber > daysInMonth) {
+      cellDate = new Date(year, month + 1, dayNumber - daysInMonth);
+      outside = true;
+    } else {
+      cellDate = new Date(year, month, dayNumber);
+    }
+
+    const postsForDay = cachedPosts.filter((post) => new Date(post.scheduledAt).toDateString() === cellDate.toDateString());
+    const isToday = cellDate.toDateString() === todayKey;
+
+    const pills = postsForDay
+      .map((post) => {
+        const time = new Date(post.scheduledAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const emoji = post.platforms.map((platform) => PLATFORM_EMOJI[platform] ?? '').join('');
+        return `<div class="calendar-post-pill" data-calendar-post="${post.id}">${time} ${emoji}</div>`;
+      })
+      .join('');
+
+    html += `
+      <div class="calendar-day ${outside ? 'outside-month' : ''} ${isToday ? 'is-today' : ''}">
+        <span class="calendar-day-number">${cellDate.getDate()}</span>
+        ${pills}
+      </div>
+    `;
+  }
+
+  calendarGrid.innerHTML = html;
+}
+
+calendarGrid.addEventListener('click', (event) => {
+  const pill = event.target.closest('[data-calendar-post]');
+  if (!pill) return;
+  const post = cachedPosts.find((p) => p.id === Number(pill.dataset.calendarPost));
+  if (post) startEditing(post);
+});
 
 // --- Enter / exit edit mode ---
 
@@ -296,7 +467,7 @@ form.addEventListener('submit', async (event) => {
 
   if (!postResponse.ok) {
     const { error } = await postResponse.json();
-    formMessage.textContent = error ?? 'Échec de l\'enregistrement du post.';
+    formMessage.textContent = error ?? "Échec de l'enregistrement du post.";
     return;
   }
 
@@ -308,3 +479,4 @@ form.addEventListener('submit', async (event) => {
 });
 
 loadPosts();
+loadHashtagPresets();

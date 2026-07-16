@@ -14,6 +14,8 @@
       <p>Programme tes posts pour la chatterie sur Instagram, Facebook, YouTube et TikTok, en une fois.</p>
     </header>
 
+    <div id="alert-banner" class="alert-banner" hidden></div>
+
     <main>
       <section class="card">
         <h2 id="form-title">Nouveau post</h2>
@@ -72,8 +74,12 @@
               </label>
               <label data-ig-text-field>
                 Hashtags
-                <input type="text" data-field="hashtags" placeholder="#chatterie #chaton #catsofinstagram" />
+                <div class="hashtag-input-row">
+                  <input type="text" data-field="hashtags" placeholder="#chatterie #chaton #catsofinstagram" />
+                  <button type="button" class="save-preset-button" data-save-preset="instagram" title="Enregistrer ces hashtags">💾</button>
+                </div>
               </label>
+              <div class="hashtag-presets" data-presets-platform="instagram"></div>
             </div>
             <div class="platform-panel" data-platform="facebook" hidden>
               <h3>📘 Facebook</h3>
@@ -83,8 +89,12 @@
               </label>
               <label>
                 Hashtags
-                <input type="text" data-field="hashtags" placeholder="#chatterie" />
+                <div class="hashtag-input-row">
+                  <input type="text" data-field="hashtags" placeholder="#chatterie" />
+                  <button type="button" class="save-preset-button" data-save-preset="facebook" title="Enregistrer ces hashtags">💾</button>
+                </div>
               </label>
+              <div class="hashtag-presets" data-presets-platform="facebook"></div>
             </div>
             <div class="platform-panel" data-platform="youtube" hidden>
               <h3>▶️ YouTube</h3>
@@ -94,8 +104,12 @@
               </label>
               <label>
                 Tags
-                <input type="text" data-field="hashtags" placeholder="#chats #elevage" />
+                <div class="hashtag-input-row">
+                  <input type="text" data-field="hashtags" placeholder="#chats #elevage" />
+                  <button type="button" class="save-preset-button" data-save-preset="youtube" title="Enregistrer ces tags">💾</button>
+                </div>
               </label>
+              <div class="hashtag-presets" data-presets-platform="youtube"></div>
             </div>
             <div class="platform-panel" data-platform="tiktok" hidden>
               <h3>🎵 TikTok</h3>
@@ -105,8 +119,12 @@
               </label>
               <label>
                 Hashtags
-                <input type="text" data-field="hashtags" placeholder="#chatontiktok #fyp" />
+                <div class="hashtag-input-row">
+                  <input type="text" data-field="hashtags" placeholder="#chatontiktok #fyp" />
+                  <button type="button" class="save-preset-button" data-save-preset="tiktok" title="Enregistrer ces hashtags">💾</button>
+                </div>
               </label>
+              <div class="hashtag-presets" data-presets-platform="tiktok"></div>
             </div>
           </div>
 
@@ -124,7 +142,23 @@
       </section>
 
       <section class="card">
-        <h2>Posts programmés</h2>
+        <div class="section-header">
+          <h2>Posts programmés</h2>
+          <div class="view-toggle">
+            <button type="button" class="view-toggle-button active" data-view="list">📋 Liste</button>
+            <button type="button" class="view-toggle-button" data-view="calendar">📅 Calendrier</button>
+          </div>
+        </div>
+
+        <div id="calendar-view" class="calendar-view" hidden>
+          <div class="calendar-nav">
+            <button type="button" id="calendar-prev" class="ghost-button">‹ Précédent</button>
+            <span id="calendar-month-label"></span>
+            <button type="button" id="calendar-next" class="ghost-button">Suivant ›</button>
+          </div>
+          <div id="calendar-grid" class="calendar-grid"></div>
+        </div>
+
         <ul id="post-list" class="post-list"></ul>
         <p id="empty-message" class="empty-message" hidden>Aucun post programmé pour l'instant.</p>
       </section>

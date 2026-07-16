@@ -35,6 +35,13 @@ export interface Post {
   createdAt: string;
 }
 
+export interface HashtagPreset {
+  id: number;
+  platform: Platform;
+  hashtags: string;
+  createdAt: string;
+}
+
 export interface CreatePostInput {
   baseText: string;
   platformContent: PlatformContentMap;
