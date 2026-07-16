@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>MiaouPost</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🐱 MiaouPost</h1>
+    <p>Programme tes posts pour la chatterie sur Instagram, Facebook, YouTube et TikTok.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Nouveau post</h2>
+      <form id="post-form">
+        <label>
+          Média (image ou vidéo)
+          <input type="file" id="file" accept="image/*,video/*" required />
+        </label>
+
+        <label>
+          Légende
+          <textarea id="caption" rows="3" required></textarea>
+        </label>
+
+        <fieldset>
+          <legend>Plateformes</legend>
+          <label><input type="checkbox" name="platform" value="instagram" /> Instagram</label>
+          <label><input type="checkbox" name="platform" value="facebook" /> Facebook</label>
+          <label><input type="checkbox" name="platform" value="youtube" /> YouTube</label>
+          <label><input type="checkbox" name="platform" value="tiktok" /> TikTok</label>
+        </fieldset>
+
+        <label>
+          Date et heure de publication
+          <input type="datetime-local" id="scheduledAt" required />
+        </label>
+
+        <button type="submit">Programmer</button>
+      </form>
+      <p id="form-message"></p>
+    </section>
+
+    <section class="card">
+      <h2>Posts programmés</h2>
+      <ul id="post-list"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
+import { CreatePostInput, Platform, PlatformResult, Post, PostStatus } from './types';
+
+const dataDir = path.join(process.cwd(), 'data');
+fs.mkdirSync(dataDir, { recursive: true });
+
+const db = new Database(path.join(dataDir, 'miaoupost.db'));
+db.pragma('journal_mode = WAL');
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    caption TEXT NOT NULL,
+    mediaPath TEXT NOT NULL,
+    mediaType TEXT NOT NULL,
+    platforms TEXT NOT NULL,
+    scheduledAt TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'scheduled',
+    results TEXT NOT NULL DEFAULT '[]',
+    createdAt TEXT NOT NULL
+  )
+`);
+
+interface PostRow {
+  id: number;
+  caption: string;
+  mediaPath: string;
+  mediaType: string;
+  platforms: string;
+  scheduledAt: string;
+  status: string;
+  results: string;
+  createdAt: string;
+}
+
+function rowToPost(row: PostRow): Post {
+  return {
+    id: row.id,
+    caption: row.caption,
+    mediaPath: row.mediaPath,
+    mediaType: row.mediaType as Post['mediaType'],
+    platforms: JSON.parse(row.platforms) as Platform[],
+    scheduledAt: row.scheduledAt,
+    status: row.status as PostStatus,
+    results: JSON.parse(row.results) as PlatformResult[],
+    createdAt: row.createdAt,
+  };
+}
+
+export function createPost(input: CreatePostInput): Post {
+  const stmt = db.prepare(`
+    INSERT INTO posts (caption, mediaPath, mediaType, platforms, scheduledAt, status, results, createdAt)
+    VALUES (@caption, @mediaPath, @mediaType, @platforms, @scheduledAt, 'scheduled', '[]', @createdAt)
+  `);
+  const info = stmt.run({
+    caption: input.caption,
+    mediaPath: input.mediaPath,
+    mediaType: input.mediaType,
+    platforms: JSON.stringify(input.platforms),
+    scheduledAt: input.scheduledAt,
+    createdAt: new Date().toISOString(),
+  });
+  return getPost(Number(info.lastInsertRowid))!;
+}
+
+export function getPost(id: number): Post | undefined {
+  const row = db.prepare('SELECT * FROM posts WHERE id = ?').get(id) as PostRow | undefined;
+  return row ? rowToPost(row) : undefined;
+}
+
+export function listPosts(): Post[] {
+  const rows = db.prepare('SELECT * FROM posts ORDER BY scheduledAt DESC').all() as PostRow[];
+  return rows.map(rowToPost);
+}
+
+export function listDuePosts(nowIso: string): Post[] {
+  const rows = db
+    .prepare("SELECT * FROM posts WHERE status = 'scheduled' AND scheduledAt <= ?")
+    .all(nowIso) as PostRow[];
+  return rows.map(rowToPost);
+}
+
+export function updatePostStatus(id: number, status: PostStatus, results: PlatformResult[]): void {
+  db.prepare('UPDATE posts SET status = ?, results = ? WHERE id = ?').run(
+    status,
+    JSON.stringify(results),
+    id,
+  );
+}
+
+export function deletePost(id: number): void {
+  db.prepare('DELETE FROM posts WHERE id = ?').run(id);
+}

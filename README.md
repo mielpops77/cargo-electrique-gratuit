@@ -1,59 +1,37 @@
-# Vélo cargo électrique
+# 🐱 MiaouPost
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.2.
+App perso pour programmer et publier des posts sur Instagram, Facebook, YouTube et TikTok en même temps, pour la chatterie.
 
-## Development server
+## Fonctionnement
 
-To start a local development server, run:
+- Un formulaire web pour créer un post (média + légende + plateformes + date/heure).
+- Un scheduler (cron interne, vérifie chaque minute) qui publie automatiquement les posts dus via les API officielles de chaque plateforme.
+- Une base SQLite locale (`data/miaoupost.db`) qui stocke les posts et leur statut (`scheduled`, `publishing`, `published`, `failed`).
 
-```bash
-ng serve
-```
+## Prérequis : accès aux API
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Ce projet suppose des comptes en mode développement/testeur (usage perso, pas de review complète nécessaire — voir discussion de faisabilité). Il faut renseigner un fichier `.env` (copier `.env.example`) :
 
-## Code scaffolding
+- **Facebook / Instagram** : token de Page longue durée depuis [Graph API Explorer](https://developers.facebook.com/tools/explorer), avec ton compte Instagram Business/Creator lié à la Page.
+- **YouTube** : client OAuth "Desktop" sur [Google Cloud Console](https://console.cloud.google.com), refresh token obtenu via OAuth Playground avec le scope `youtube.upload`.
+- **TikTok** : token OAuth via TikTok for Developers (Content Posting API). Tant que l'app n'est pas auditée, la publication reste en visibilité restreinte.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+⚠️ Instagram et TikTok récupèrent le média en le téléchargeant depuis une URL publique : le serveur doit donc être exposé publiquement (domaine ou tunnel type Cloudflare Tunnel / ngrok), renseigné dans `PUBLIC_BASE_URL`.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Installation
 
 ```bash
-ng generate --help
+npm install
+cp .env.example .env
+# renseigner .env avec tes tokens
+npm run dev
 ```
 
-## Building
+Ouvre `http://localhost:3000`.
 
-To build the project run:
+## Scripts
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `npm run dev` — serveur de développement (rechargement auto)
+- `npm run build` — compile en `dist/`
+- `npm start` — lance la version compilée
+- `npm run typecheck` — vérifie les types sans compiler
