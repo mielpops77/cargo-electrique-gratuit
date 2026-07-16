@@ -30,6 +30,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', system-ui, sans-serif;
@@ -161,10 +165,6 @@ input:focus {
   gap: 0.6rem;
 }
 
-.preview-wrapper[hidden] {
-  display: none;
-}
-
 .preview-wrapper img,
 .preview-wrapper video {
   max-width: 100%;
@@ -233,13 +233,29 @@ input:focus {
   gap: 0.75rem;
 }
 
-.platform-panel[hidden] {
-  display: none;
-}
-
 .platform-panel h3 {
   margin: 0;
   font-size: 0.95rem;
+}
+
+.post-type-toggle {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.post-type-toggle label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .primary-button {
@@ -329,6 +345,12 @@ input:focus {
 .post-caption {
   margin: 0.2rem 0 0.5rem;
   font-size: 0.92rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
 }
 
 .delete-button {

@@ -97,3 +97,23 @@ export function updatePostStatus(id: number, status: PostStatus, results: Platfo
 export function deletePost(id: number): void {
   db.prepare('DELETE FROM posts WHERE id = ?').run(id);
 }
+
+export function updatePost(id: number, input: CreatePostInput): Post {
+  const stmt = db.prepare(`
+    UPDATE posts
+    SET baseText = @baseText, platformContent = @platformContent, mediaPath = @mediaPath,
+        mediaType = @mediaType, platforms = @platforms, scheduledAt = @scheduledAt,
+        status = 'scheduled', results = '[]'
+    WHERE id = @id
+  `);
+  stmt.run({
+    id,
+    baseText: input.baseText,
+    platformContent: JSON.stringify(input.platformContent),
+    mediaPath: input.mediaPath,
+    mediaType: input.mediaType,
+    platforms: JSON.stringify(input.platforms),
+    scheduledAt: input.scheduledAt,
+  });
+  return getPost(id)!;
+}

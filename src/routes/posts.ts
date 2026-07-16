@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { createPost, deletePost, listPosts } from '../db';
-import { Platform, PlatformContentMap } from '../types';
+import { createPost, deletePost, getPost, listPosts, updatePost } from '../db';
+import { CreatePostInput, Platform, PlatformContentMap } from '../types';
 
 const VALID_PLATFORMS: Platform[] = ['facebook', 'instagram', 'youtube', 'tiktok'];
+const EDITABLE_STATUSES = ['scheduled', 'failed'];
 
 export const postsRouter = Router();
 
@@ -24,46 +25,74 @@ function parsePlatformContent(input: unknown, platforms: Platform[]): PlatformCo
     if (typeof content !== 'object' || content === null) {
       return { error: `platformContent.${platform} doit être un objet` };
     }
-    const { text, hashtags } = content as Record<string, unknown>;
+    const { text, hashtags, postType } = content as Record<string, unknown>;
     if (text !== undefined && typeof text !== 'string') {
       return { error: `platformContent.${platform}.text doit être une chaîne` };
     }
     if (hashtags !== undefined && typeof hashtags !== 'string') {
       return { error: `platformContent.${platform}.hashtags doit être une chaîne` };
     }
-    result[platform as Platform] = { text, hashtags };
+    if (postType !== undefined && (platform !== 'instagram' || (postType !== 'feed' && postType !== 'story'))) {
+      return { error: `platformContent.${platform}.postType invalide (seul instagram accepte "feed" ou "story")` };
+    }
+    result[platform as Platform] = { text, hashtags, postType: postType as 'feed' | 'story' | undefined };
   }
   return result;
 }
 
-postsRouter.post('/', (req, res) => {
-  const { baseText, platformContent, mediaPath, mediaType, platforms, scheduledAt } = req.body ?? {};
+function parsePostInput(body: unknown): CreatePostInput | { error: string } {
+  const { baseText, platformContent, mediaPath, mediaType, platforms, scheduledAt } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof baseText !== 'string' || typeof mediaPath !== 'string') {
-    res.status(400).json({ error: 'baseText et mediaPath sont requis' });
-    return;
+    return { error: 'baseText et mediaPath sont requis' };
   }
   if (mediaType !== 'image' && mediaType !== 'video') {
-    res.status(400).json({ error: 'mediaType doit être "image" ou "video"' });
-    return;
+    return { error: 'mediaType doit être "image" ou "video"' };
   }
   if (!Array.isArray(platforms) || platforms.length === 0 || !platforms.every((platform) => VALID_PLATFORMS.includes(platform))) {
-    res.status(400).json({ error: `platforms doit être un tableau non vide parmi ${VALID_PLATFORMS.join(', ')}` });
-    return;
+    return { error: `platforms doit être un tableau non vide parmi ${VALID_PLATFORMS.join(', ')}` };
   }
   if (typeof scheduledAt !== 'string' || Number.isNaN(Date.parse(scheduledAt))) {
-    res.status(400).json({ error: 'scheduledAt doit être une date ISO valide' });
-    return;
+    return { error: 'scheduledAt doit être une date ISO valide' };
   }
 
-  const parsedContent = parsePlatformContent(platformContent, platforms);
+  const parsedContent = parsePlatformContent(platformContent, platforms as Platform[]);
   if ('error' in parsedContent) {
-    res.status(400).json({ error: parsedContent.error });
+    return parsedContent;
+  }
+
+  return { baseText, platformContent: parsedContent, mediaPath, mediaType, platforms: platforms as Platform[], scheduledAt };
+}
+
+postsRouter.post('/', (req, res) => {
+  const parsed = parsePostInput(req.body);
+  if ('error' in parsed) {
+    res.status(400).json({ error: parsed.error });
     return;
   }
 
-  const post = createPost({ baseText, platformContent: parsedContent, mediaPath, mediaType, platforms, scheduledAt });
-  res.status(201).json(post);
+  res.status(201).json(createPost(parsed));
+});
+
+postsRouter.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const existing = getPost(id);
+  if (!existing) {
+    res.status(404).json({ error: 'Post introuvable' });
+    return;
+  }
+  if (!EDITABLE_STATUSES.includes(existing.status)) {
+    res.status(409).json({ error: `Un post au statut "${existing.status}" ne peut plus être modifié` });
+    return;
+  }
+
+  const parsed = parsePostInput(req.body);
+  if ('error' in parsed) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+
+  res.json(updatePost(id, parsed));
 });
 
 postsRouter.delete('/:id', (req, res) => {

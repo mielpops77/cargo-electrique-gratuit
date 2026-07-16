@@ -33,12 +33,23 @@ export async function publishToInstagram(post: Post): Promise<string> {
   }
 
   const mediaUrl = publicMediaUrl(post.mediaPath);
-  const caption = resolveCaption(post, 'instagram');
+  const isStory = post.platformContent.instagram?.postType === 'story';
 
-  const containerParams: Record<string, string> =
-    post.mediaType === 'video'
-      ? { video_url: mediaUrl, media_type: 'REELS', caption }
-      : { image_url: mediaUrl, caption };
+  const containerParams: Record<string, string> = {};
+  if (post.mediaType === 'video') {
+    containerParams.video_url = mediaUrl;
+  } else {
+    containerParams.image_url = mediaUrl;
+  }
+  if (isStory) {
+    containerParams.media_type = 'STORIES';
+    // Les Stories Instagram ne supportent pas de légende via l'API : seul le média est publié.
+  } else {
+    if (post.mediaType === 'video') {
+      containerParams.media_type = 'REELS';
+    }
+    containerParams.caption = resolveCaption(post, 'instagram');
+  }
 
   const { data: container } = await axios.post(
     `${GRAPH_API_BASE}/${businessAccountId}/media`,

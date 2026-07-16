@@ -12,9 +12,12 @@ export interface PlatformResult {
   publishedAt?: string;
 }
 
+export type InstagramPostType = 'feed' | 'story';
+
 export interface PlatformContent {
   text?: string;
   hashtags?: string;
+  postType?: InstagramPostType;
 }
 
 export type PlatformContentMap = Partial<Record<Platform, PlatformContent>>;

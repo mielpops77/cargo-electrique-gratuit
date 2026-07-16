@@ -5,8 +5,13 @@ const PLATFORM_EMOJI = {
   tiktok: '🎵',
 };
 
+const EDITABLE_STATUSES = ['scheduled', 'failed'];
+
 const form = document.getElementById('post-form');
+const formTitle = document.getElementById('form-title');
 const formMessage = document.getElementById('form-message');
+const submitButton = document.getElementById('submit-button');
+const cancelEditButton = document.getElementById('cancel-edit');
 const postList = document.getElementById('post-list');
 const emptyMessage = document.getElementById('empty-message');
 
@@ -20,6 +25,10 @@ const removeMediaButton = document.getElementById('remove-media');
 
 const platformToggle = document.getElementById('platform-toggle');
 const platformPanels = document.getElementById('platform-panels');
+const igStoryNote = document.getElementById('ig-story-note');
+
+// State: when editing an existing post, holds { id, mediaPath, mediaType } until a new file replaces it.
+let editingPost = null;
 
 // --- Dropzone / media preview ---
 
@@ -46,6 +55,7 @@ fileInput.addEventListener('change', () => {
 removeMediaButton.addEventListener('click', (event) => {
   event.stopPropagation();
   fileInput.value = '';
+  editingPost = null;
   dropzonePlaceholder.hidden = false;
   previewWrapper.hidden = true;
   previewImage.hidden = true;
@@ -53,12 +63,11 @@ removeMediaButton.addEventListener('click', (event) => {
   previewVideo.removeAttribute('src');
 });
 
-function showPreview(file) {
-  const url = URL.createObjectURL(file);
+function showPreview(url, isVideo) {
   dropzonePlaceholder.hidden = true;
   previewWrapper.hidden = false;
 
-  if (file.type.startsWith('video')) {
+  if (isVideo) {
     previewVideo.src = url;
     previewVideo.hidden = false;
     previewImage.hidden = true;
@@ -78,10 +87,27 @@ platformToggle.addEventListener('change', (event) => {
   if (panel) panel.hidden = !checkbox.checked;
 });
 
+// --- Instagram post type (feed vs story) ---
+
+document.getElementById('ig-post-type-toggle').addEventListener('change', (event) => {
+  if (event.target.name !== 'ig-post-type') return;
+  const isStory = event.target.value === 'story';
+  igStoryNote.hidden = !isStory;
+  document.querySelectorAll('[data-ig-text-field]').forEach((field) => {
+    field.hidden = isStory;
+  });
+});
+
 // --- Post list ---
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function toDatetimeLocal(iso) {
+  const date = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function renderPost(post) {
@@ -90,6 +116,7 @@ function renderPost(post) {
   const thumb = isImage
     ? `<img class="post-thumb" src="/media/${post.mediaPath}" alt="" />`
     : `<video class="post-thumb" src="/media/${post.mediaPath}" muted></video>`;
+  const canEdit = EDITABLE_STATUSES.includes(post.status);
 
   return `
     <li class="post-card">
@@ -101,7 +128,10 @@ function renderPost(post) {
           <span class="post-platforms">${platformBadges}</span>
         </div>
         <p class="post-caption">${escapeHtml(post.baseText).slice(0, 140)}</p>
-        <button class="delete-button" data-delete="${post.id}">Supprimer</button>
+        <div class="post-actions">
+          ${canEdit ? `<button class="ghost-button" data-edit="${post.id}">Modifier</button>` : ''}
+          <button class="delete-button" data-delete="${post.id}">Supprimer</button>
+        </div>
       </div>
     </li>
   `;
@@ -113,20 +143,73 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+let cachedPosts = [];
+
 async function loadPosts() {
   const response = await fetch('/api/posts');
-  const posts = await response.json();
+  cachedPosts = await response.json();
 
-  emptyMessage.hidden = posts.length > 0;
-  postList.innerHTML = posts.map(renderPost).join('');
+  emptyMessage.hidden = cachedPosts.length > 0;
+  postList.innerHTML = cachedPosts.map(renderPost).join('');
 
   postList.querySelectorAll('[data-delete]').forEach((button) => {
     button.addEventListener('click', async () => {
       await fetch(`/api/posts/${button.dataset.delete}`, { method: 'DELETE' });
+      if (editingPost?.id === Number(button.dataset.delete)) startEditing(null);
       loadPosts();
     });
   });
+
+  postList.querySelectorAll('[data-edit]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const post = cachedPosts.find((p) => p.id === Number(button.dataset.edit));
+      if (post) startEditing(post);
+    });
+  });
 }
+
+// --- Enter / exit edit mode ---
+
+function startEditing(post) {
+  if (!post) {
+    editingPost = null;
+    resetForm();
+    return;
+  }
+
+  editingPost = { id: post.id, mediaPath: post.mediaPath, mediaType: post.mediaType };
+
+  formTitle.textContent = `Modifier le post #${post.id}`;
+  submitButton.textContent = 'Enregistrer les modifications 💾';
+  cancelEditButton.hidden = false;
+
+  document.getElementById('base-text').value = post.baseText;
+  document.getElementById('scheduledAt').value = toDatetimeLocal(post.scheduledAt);
+
+  fileInput.value = '';
+  showPreview(`/media/${post.mediaPath}`, post.mediaType === 'video');
+
+  form.querySelectorAll('input[name="platform"]').forEach((checkbox) => {
+    checkbox.checked = post.platforms.includes(checkbox.value);
+    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  platformPanels.querySelectorAll('.platform-panel').forEach((panel) => {
+    const platform = panel.dataset.platform;
+    const content = post.platformContent?.[platform] ?? {};
+    panel.querySelector('[data-field="text"]').value = content.text ?? '';
+    panel.querySelector('[data-field="hashtags"]').value = content.hashtags ?? '';
+    if (platform === 'instagram') {
+      const postType = content.postType ?? 'feed';
+      panel.querySelector(`input[name="ig-post-type"][value="${postType}"]`).checked = true;
+      panel.querySelector(`input[name="ig-post-type"][value="${postType}"]`).dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+cancelEditButton.addEventListener('click', () => startEditing(null));
 
 // --- Form submission ---
 
@@ -136,8 +219,12 @@ function collectPlatformContent(selectedPlatforms) {
     const panel = platformPanels.querySelector(`[data-platform="${platform}"]`);
     const text = panel.querySelector('[data-field="text"]').value.trim();
     const hashtags = panel.querySelector('[data-field="hashtags"]').value.trim();
-    if (text || hashtags) {
-      platformContent[platform] = { text: text || undefined, hashtags: hashtags || undefined };
+    const content = { text: text || undefined, hashtags: hashtags || undefined };
+    if (platform === 'instagram') {
+      content.postType = panel.querySelector('input[name="ig-post-type"]:checked').value;
+    }
+    if (content.text || content.hashtags || content.postType === 'story') {
+      platformContent[platform] = content;
     }
   });
   return platformContent;
@@ -145,10 +232,17 @@ function collectPlatformContent(selectedPlatforms) {
 
 function resetForm() {
   form.reset();
+  formTitle.textContent = 'Nouveau post';
+  submitButton.textContent = 'Programmer 🐾';
+  cancelEditButton.hidden = true;
   dropzonePlaceholder.hidden = false;
   previewWrapper.hidden = true;
   previewImage.hidden = true;
   previewVideo.hidden = true;
+  igStoryNote.hidden = true;
+  document.querySelectorAll('[data-ig-text-field]').forEach((field) => {
+    field.hidden = false;
+  });
   platformPanels.querySelectorAll('.platform-panel').forEach((panel) => {
     panel.hidden = true;
   });
@@ -163,42 +257,53 @@ form.addEventListener('submit', async (event) => {
   const scheduledAt = document.getElementById('scheduledAt').value;
   const platforms = [...form.querySelectorAll('input[name="platform"]:checked')].map((input) => input.value);
 
-  if (!file || platforms.length === 0) {
+  if ((!file && !editingPost) || platforms.length === 0) {
     formMessage.textContent = 'Choisis un média et au moins une plateforme.';
     return;
   }
 
-  const uploadData = new FormData();
-  uploadData.append('file', file);
+  let mediaPath = editingPost?.mediaPath;
+  let mediaType = editingPost?.mediaType;
 
-  const uploadResponse = await fetch('/api/media/upload', { method: 'POST', body: uploadData });
-  if (!uploadResponse.ok) {
-    formMessage.textContent = "Échec de l'envoi du média.";
-    return;
+  if (file) {
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+    const uploadResponse = await fetch('/api/media/upload', { method: 'POST', body: uploadData });
+    if (!uploadResponse.ok) {
+      formMessage.textContent = "Échec de l'envoi du média.";
+      return;
+    }
+    ({ mediaPath, mediaType } = await uploadResponse.json());
   }
-  const { mediaPath, mediaType } = await uploadResponse.json();
 
-  const postResponse = await fetch('/api/posts', {
-    method: 'POST',
+  const payload = {
+    baseText,
+    platformContent: collectPlatformContent(platforms),
+    mediaPath,
+    mediaType,
+    platforms,
+    scheduledAt: new Date(scheduledAt).toISOString(),
+  };
+
+  const url = editingPost ? `/api/posts/${editingPost.id}` : '/api/posts';
+  const method = editingPost ? 'PUT' : 'POST';
+
+  const postResponse = await fetch(url, {
+    method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      baseText,
-      platformContent: collectPlatformContent(platforms),
-      mediaPath,
-      mediaType,
-      platforms,
-      scheduledAt: new Date(scheduledAt).toISOString(),
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!postResponse.ok) {
     const { error } = await postResponse.json();
-    formMessage.textContent = error ?? 'Échec de la programmation du post.';
+    formMessage.textContent = error ?? 'Échec de l\'enregistrement du post.';
     return;
   }
 
+  const wasEditing = Boolean(editingPost);
+  editingPost = null;
   resetForm();
-  formMessage.textContent = 'Post programmé ! 🎉';
+  formMessage.textContent = wasEditing ? 'Post modifié ! 🎉' : 'Post programmé ! 🎉';
   loadPosts();
 });
 
