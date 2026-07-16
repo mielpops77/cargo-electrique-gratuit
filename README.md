@@ -18,6 +18,10 @@ Ce projet suppose des comptes en mode développement/testeur (usage perso, pas d
 
 ⚠️ Instagram et TikTok récupèrent le média en le téléchargeant depuis une URL publique : le serveur doit donc être exposé publiquement (domaine ou tunnel type Cloudflare Tunnel / ngrok), renseigné dans `PUBLIC_BASE_URL`.
 
+## Protection par mot de passe
+
+Dès que l'app est exposée publiquement (hébergement, tunnel), configure `APP_PASSWORD` dans `.env` pour activer une protection HTTP Basic Auth sur toute l'app (UI + API). Le navigateur demandera le nom d'utilisateur (`APP_USERNAME`, par défaut `miaoupost`) et le mot de passe, une seule fois — pratique pour un accès partagé à deux. Laisse `APP_PASSWORD` vide en local si tu ne veux pas de protection.
+
 ## Installation
 
 ```bash
