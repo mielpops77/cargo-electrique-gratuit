@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { config } from '../config';
 import { publicMediaUrl } from '../publicUrl';
+import { resolveCaption } from '../caption';
 import { Post } from '../types';
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0';
@@ -18,7 +19,7 @@ export async function publishToFacebook(post: Post): Promise<string> {
   const response = await axios.post(`${GRAPH_API_BASE}/${pageId}/${endpoint}`, null, {
     params: {
       [mediaUrlField]: mediaUrl,
-      caption: post.caption,
+      caption: resolveCaption(post, 'facebook'),
       access_token: pageAccessToken,
     },
   });

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { config } from '../config';
 import { publicMediaUrl } from '../publicUrl';
+import { resolveCaption } from '../caption';
 import { Post } from '../types';
 
 const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0';
@@ -32,11 +33,12 @@ export async function publishToInstagram(post: Post): Promise<string> {
   }
 
   const mediaUrl = publicMediaUrl(post.mediaPath);
+  const caption = resolveCaption(post, 'instagram');
 
   const containerParams: Record<string, string> =
     post.mediaType === 'video'
-      ? { video_url: mediaUrl, media_type: 'REELS', caption: post.caption }
-      : { image_url: mediaUrl, caption: post.caption };
+      ? { video_url: mediaUrl, media_type: 'REELS', caption }
+      : { image_url: mediaUrl, caption };
 
   const { data: container } = await axios.post(
     `${GRAPH_API_BASE}/${businessAccountId}/media`,

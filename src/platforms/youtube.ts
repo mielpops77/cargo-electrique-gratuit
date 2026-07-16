@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { google } from 'googleapis';
 import { config } from '../config';
+import { resolveCaption } from '../caption';
 import { Post } from '../types';
 
 const MEDIA_DIR = path.join(process.cwd(), 'media');
@@ -20,14 +21,15 @@ export async function publishToYoutube(post: Post): Promise<string> {
 
   const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
   const filePath = path.join(MEDIA_DIR, post.mediaPath);
-  const [title, ...rest] = post.caption.split('\n');
+  const caption = resolveCaption(post, 'youtube');
+  const [title, ...rest] = caption.split('\n');
 
   const response = await youtube.videos.insert({
     part: ['snippet', 'status'],
     requestBody: {
       snippet: {
         title: title.slice(0, 100) || 'MiaouPost',
-        description: rest.join('\n') || post.caption,
+        description: rest.join('\n') || caption,
       },
       status: {
         privacyStatus: 'public',

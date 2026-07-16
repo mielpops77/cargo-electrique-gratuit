@@ -12,9 +12,17 @@ export interface PlatformResult {
   publishedAt?: string;
 }
 
+export interface PlatformContent {
+  text?: string;
+  hashtags?: string;
+}
+
+export type PlatformContentMap = Partial<Record<Platform, PlatformContent>>;
+
 export interface Post {
   id: number;
-  caption: string;
+  baseText: string;
+  platformContent: PlatformContentMap;
   mediaPath: string;
   mediaType: MediaType;
   platforms: Platform[];
@@ -25,7 +33,8 @@ export interface Post {
 }
 
 export interface CreatePostInput {
-  caption: string;
+  baseText: string;
+  platformContent: PlatformContentMap;
   mediaPath: string;
   mediaType: MediaType;
   platforms: Platform[];

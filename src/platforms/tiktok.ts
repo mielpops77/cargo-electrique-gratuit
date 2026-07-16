@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { config } from '../config';
 import { publicMediaUrl } from '../publicUrl';
+import { resolveCaption } from '../caption';
 import { Post } from '../types';
 
 const API_BASE = 'https://open.tiktokapis.com/v2';
@@ -43,7 +44,7 @@ export async function publishToTiktok(post: Post): Promise<string> {
     `${API_BASE}/post/publish/video/init/`,
     {
       post_info: {
-        title: post.caption,
+        title: resolveCaption(post, 'tiktok'),
         privacy_level: 'PUBLIC_TO_EVERYONE',
       },
       source_info: {

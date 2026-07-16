@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { CreatePostInput, Platform, PlatformResult, Post, PostStatus } from './types';
+import { CreatePostInput, Platform, PlatformContentMap, PlatformResult, Post, PostStatus } from './types';
 
 const dataDir = path.join(process.cwd(), 'data');
 fs.mkdirSync(dataDir, { recursive: true });
@@ -12,7 +12,8 @@ db.pragma('journal_mode = WAL');
 db.exec(`
   CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    caption TEXT NOT NULL,
+    baseText TEXT NOT NULL,
+    platformContent TEXT NOT NULL DEFAULT '{}',
     mediaPath TEXT NOT NULL,
     mediaType TEXT NOT NULL,
     platforms TEXT NOT NULL,
@@ -25,7 +26,8 @@ db.exec(`
 
 interface PostRow {
   id: number;
-  caption: string;
+  baseText: string;
+  platformContent: string;
   mediaPath: string;
   mediaType: string;
   platforms: string;
@@ -38,7 +40,8 @@ interface PostRow {
 function rowToPost(row: PostRow): Post {
   return {
     id: row.id,
-    caption: row.caption,
+    baseText: row.baseText,
+    platformContent: JSON.parse(row.platformContent) as PlatformContentMap,
     mediaPath: row.mediaPath,
     mediaType: row.mediaType as Post['mediaType'],
     platforms: JSON.parse(row.platforms) as Platform[],
@@ -51,11 +54,12 @@ function rowToPost(row: PostRow): Post {
 
 export function createPost(input: CreatePostInput): Post {
   const stmt = db.prepare(`
-    INSERT INTO posts (caption, mediaPath, mediaType, platforms, scheduledAt, status, results, createdAt)
-    VALUES (@caption, @mediaPath, @mediaType, @platforms, @scheduledAt, 'scheduled', '[]', @createdAt)
+    INSERT INTO posts (baseText, platformContent, mediaPath, mediaType, platforms, scheduledAt, status, results, createdAt)
+    VALUES (@baseText, @platformContent, @mediaPath, @mediaType, @platforms, @scheduledAt, 'scheduled', '[]', @createdAt)
   `);
   const info = stmt.run({
-    caption: input.caption,
+    baseText: input.baseText,
+    platformContent: JSON.stringify(input.platformContent),
     mediaPath: input.mediaPath,
     mediaType: input.mediaType,
     platforms: JSON.stringify(input.platforms),

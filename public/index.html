@@ -2,52 +2,126 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MiaouPost</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>🐱 MiaouPost</h1>
-    <p>Programme tes posts pour la chatterie sur Instagram, Facebook, YouTube et TikTok.</p>
-  </header>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-emoji">🐾</div>
+      <h1>MiaouPost</h1>
+      <p>Programme tes posts pour la chatterie sur Instagram, Facebook, YouTube et TikTok, en une fois.</p>
+    </header>
 
-  <main>
-    <section class="card">
-      <h2>Nouveau post</h2>
-      <form id="post-form">
-        <label>
-          Média (image ou vidéo)
-          <input type="file" id="file" accept="image/*,video/*" required />
-        </label>
+    <main>
+      <section class="card">
+        <h2>Nouveau post</h2>
+        <form id="post-form">
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file" accept="image/*,video/*" hidden />
+            <div id="dropzone-placeholder" class="dropzone-placeholder">
+              <span class="dropzone-icon">📷</span>
+              <p>Clique ou dépose une image / vidéo</p>
+            </div>
+            <div id="preview-wrapper" class="preview-wrapper" hidden>
+              <img id="preview-image" hidden alt="Aperçu du média" />
+              <video id="preview-video" controls hidden></video>
+              <button type="button" id="remove-media" class="ghost-button">Changer de média</button>
+            </div>
+          </div>
 
-        <label>
-          Légende
-          <textarea id="caption" rows="3" required></textarea>
-        </label>
+          <label>
+            Texte de base
+            <textarea id="base-text" rows="3" placeholder="Ex : Rencontrez nos adorables chatons du jour !" required></textarea>
+          </label>
 
-        <fieldset>
-          <legend>Plateformes</legend>
-          <label><input type="checkbox" name="platform" value="instagram" /> Instagram</label>
-          <label><input type="checkbox" name="platform" value="facebook" /> Facebook</label>
-          <label><input type="checkbox" name="platform" value="youtube" /> YouTube</label>
-          <label><input type="checkbox" name="platform" value="tiktok" /> TikTok</label>
-        </fieldset>
+          <div class="field-group">
+            <span class="field-label">Plateformes</span>
+            <div class="platform-toggle" id="platform-toggle">
+              <label class="chip chip-instagram">
+                <input type="checkbox" name="platform" value="instagram" />
+                <span>📸 Instagram</span>
+              </label>
+              <label class="chip chip-facebook">
+                <input type="checkbox" name="platform" value="facebook" />
+                <span>📘 Facebook</span>
+              </label>
+              <label class="chip chip-youtube">
+                <input type="checkbox" name="platform" value="youtube" />
+                <span>▶️ YouTube</span>
+              </label>
+              <label class="chip chip-tiktok">
+                <input type="checkbox" name="platform" value="tiktok" />
+                <span>🎵 TikTok</span>
+              </label>
+            </div>
+          </div>
 
-        <label>
-          Date et heure de publication
-          <input type="datetime-local" id="scheduledAt" required />
-        </label>
+          <div id="platform-panels">
+            <div class="platform-panel" data-platform="instagram" hidden>
+              <h3>📸 Instagram</h3>
+              <label>
+                Texte personnalisé <span class="hint">(vide = texte de base)</span>
+                <textarea data-field="text" rows="2"></textarea>
+              </label>
+              <label>
+                Hashtags
+                <input type="text" data-field="hashtags" placeholder="#chatterie #chaton #catsofinstagram" />
+              </label>
+            </div>
+            <div class="platform-panel" data-platform="facebook" hidden>
+              <h3>📘 Facebook</h3>
+              <label>
+                Texte personnalisé <span class="hint">(vide = texte de base)</span>
+                <textarea data-field="text" rows="2"></textarea>
+              </label>
+              <label>
+                Hashtags
+                <input type="text" data-field="hashtags" placeholder="#chatterie" />
+              </label>
+            </div>
+            <div class="platform-panel" data-platform="youtube" hidden>
+              <h3>▶️ YouTube</h3>
+              <label>
+                Titre + description <span class="hint">(1ère ligne = titre · vide = texte de base)</span>
+                <textarea data-field="text" rows="2"></textarea>
+              </label>
+              <label>
+                Tags
+                <input type="text" data-field="hashtags" placeholder="#chats #elevage" />
+              </label>
+            </div>
+            <div class="platform-panel" data-platform="tiktok" hidden>
+              <h3>🎵 TikTok</h3>
+              <label>
+                Texte personnalisé <span class="hint">(vide = texte de base)</span>
+                <textarea data-field="text" rows="2"></textarea>
+              </label>
+              <label>
+                Hashtags
+                <input type="text" data-field="hashtags" placeholder="#chatontiktok #fyp" />
+              </label>
+            </div>
+          </div>
 
-        <button type="submit">Programmer</button>
-      </form>
-      <p id="form-message"></p>
-    </section>
+          <label>
+            Date et heure de publication
+            <input type="datetime-local" id="scheduledAt" required />
+          </label>
 
-    <section class="card">
-      <h2>Posts programmés</h2>
-      <ul id="post-list"></ul>
-    </section>
-  </main>
+          <button type="submit" class="primary-button">Programmer 🐾</button>
+        </form>
+        <p id="form-message" class="form-message"></p>
+      </section>
+
+      <section class="card">
+        <h2>Posts programmés</h2>
+        <ul id="post-list" class="post-list"></ul>
+        <p id="empty-message" class="empty-message" hidden>Aucun post programmé pour l'instant.</p>
+      </section>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>

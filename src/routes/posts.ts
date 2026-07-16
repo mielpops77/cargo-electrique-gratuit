@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createPost, deletePost, listPosts } from '../db';
-import { Platform } from '../types';
+import { Platform, PlatformContentMap } from '../types';
 
 const VALID_PLATFORMS: Platform[] = ['facebook', 'instagram', 'youtube', 'tiktok'];
 
@@ -10,11 +10,37 @@ postsRouter.get('/', (_req, res) => {
   res.json(listPosts());
 });
 
-postsRouter.post('/', (req, res) => {
-  const { caption, mediaPath, mediaType, platforms, scheduledAt } = req.body ?? {};
+function parsePlatformContent(input: unknown, platforms: Platform[]): PlatformContentMap | { error: string } {
+  if (input === undefined || input === null) return {};
+  if (typeof input !== 'object' || Array.isArray(input)) {
+    return { error: 'platformContent doit être un objet' };
+  }
 
-  if (typeof caption !== 'string' || typeof mediaPath !== 'string') {
-    res.status(400).json({ error: 'caption et mediaPath sont requis' });
+  const result: PlatformContentMap = {};
+  for (const [platform, content] of Object.entries(input as Record<string, unknown>)) {
+    if (!VALID_PLATFORMS.includes(platform as Platform) || !platforms.includes(platform as Platform)) {
+      return { error: `platformContent contient une plateforme invalide ou non sélectionnée: ${platform}` };
+    }
+    if (typeof content !== 'object' || content === null) {
+      return { error: `platformContent.${platform} doit être un objet` };
+    }
+    const { text, hashtags } = content as Record<string, unknown>;
+    if (text !== undefined && typeof text !== 'string') {
+      return { error: `platformContent.${platform}.text doit être une chaîne` };
+    }
+    if (hashtags !== undefined && typeof hashtags !== 'string') {
+      return { error: `platformContent.${platform}.hashtags doit être une chaîne` };
+    }
+    result[platform as Platform] = { text, hashtags };
+  }
+  return result;
+}
+
+postsRouter.post('/', (req, res) => {
+  const { baseText, platformContent, mediaPath, mediaType, platforms, scheduledAt } = req.body ?? {};
+
+  if (typeof baseText !== 'string' || typeof mediaPath !== 'string') {
+    res.status(400).json({ error: 'baseText et mediaPath sont requis' });
     return;
   }
   if (mediaType !== 'image' && mediaType !== 'video') {
@@ -30,7 +56,13 @@ postsRouter.post('/', (req, res) => {
     return;
   }
 
-  const post = createPost({ caption, mediaPath, mediaType, platforms, scheduledAt });
+  const parsedContent = parsePlatformContent(platformContent, platforms);
+  if ('error' in parsedContent) {
+    res.status(400).json({ error: parsedContent.error });
+    return;
+  }
+
+  const post = createPost({ baseText, platformContent: parsedContent, mediaPath, mediaType, platforms, scheduledAt });
   res.status(201).json(post);
 });
 
