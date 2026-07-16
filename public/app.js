@@ -351,7 +351,7 @@ function startEditing(post) {
   editingPost = { id: post.id, mediaPath: post.mediaPath, mediaType: post.mediaType };
 
   formTitle.textContent = `Modifier le post #${post.id}`;
-  submitButton.textContent = 'Enregistrer les modifications';
+  submitButton.textContent = 'Enregistrer les modifications 💾';
   cancelEditButton.hidden = false;
 
   document.getElementById('base-text').value = post.baseText;
@@ -474,7 +474,7 @@ form.addEventListener('submit', async (event) => {
   const wasEditing = Boolean(editingPost);
   editingPost = null;
   resetForm();
-  formMessage.textContent = wasEditing ? 'Post modifié.' : 'Post programmé.';
+  formMessage.textContent = wasEditing ? 'Post modifié ! 🎉' : 'Post programmé ! 🎉';
   loadPosts();
 });
 
